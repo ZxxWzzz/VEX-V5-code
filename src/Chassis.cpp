@@ -77,12 +77,12 @@ void Chassis_Controller() {
   if (ch3value != 0) // 该情况下小车处于前进状态
   {
     if (ch4value >= 0) {
-      leftSpeed = (ch3value + ch4value * 0.7) * 12 / 100.0;
-      rightSpeed = (ch3value - ch4value * 1.0) * 12 / 100.0;
+      leftSpeed = (ch3value + ch4value * 0.6) * 12 / 100.0;
+      rightSpeed = (ch3value - ch4value * 0.9) * 12 / 100.0;
     }
     if (ch4value < 0) {
-      leftSpeed = (ch3value + ch4value * 1.0) * 12 / 100.0;
-      rightSpeed = (ch3value - ch4value * 0.7) * 12 / 100.0;
+      leftSpeed = (ch3value + ch4value * 0.9) * 12 / 100.0;
+      rightSpeed = (ch3value - ch4value * 0.6) * 12 / 100.0;
     }
   } else // 该情况下小车处于原地旋转
   {
@@ -116,8 +116,6 @@ void Chassis_Controller() {
     }
   }
 }
-
-
 
 /*===========================================================================*/
 
