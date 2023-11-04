@@ -23,6 +23,7 @@ double UI_test_data = 0;
 返 回 值： 无
 \*---------------END------------------*/
 
+//新加入PID算法，在下方底盘控制程序中应用该方法
 double PID_Controller(double target, double current) {
   // PID控制算法
   double Kp = 0.5; // 比例系数
