@@ -111,10 +111,21 @@ void shooterClick(bool Button)
 \*---------------END------------------*/
 
 bool isMotorReversed = false;
+bool starthold = false;
+
 
 void gua(bool Button_a) {
     cegua.setBrake(vex::brakeType::hold);  // 锁死电机
     
+    //  初始锁死
+    if(!starthold){
+      cegua.spin(forward, 100, pct);
+      wait(350, msec);  // 等待0.35秒
+      cegua.stop();     // 停止电机
+      cegua.setBrake(vex::brakeType::hold);  // 锁死电机
+      starthold = true;
+      }
+
     if (Button_a) {
         // 切换电机状态
         isMotorReversed = !isMotorReversed;

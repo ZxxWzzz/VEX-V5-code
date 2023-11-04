@@ -22,82 +22,102 @@ double UI_test_data = 0;
 输入变量： 
 返 回 值： 无
 \*---------------END------------------*/
+
+double PID_Controller(double target, double current) {
+  // PID控制算法
+  double Kp = 0.5; // 比例系数
+  double Ki = 0.1; // 积分系数
+  double Kd = 0.2; // 微分系数
+  static double prevError = 0;
+  static double integral = 0;
+  
+  double error = target - current;
+  integral += error;
+  double derivative = error - prevError;
+  
+  double output = Kp * error + Ki * integral + Kd * derivative;
+  
+  prevError = error;
+  
+  return output;
+}
+
 double Gyro_Chassis = 0.0f;
 bool ch3_change = false;                                  
-void Chassis_Controller()   
-{
-  static bool Gyro_state = false;    //陀螺仪开启
-  static int8_t Chassis_Dir = 1;    //改方向
-  double ch3value = Chassis_Dir * Controller1.Axis3.position(percent);  //左摇杆
-  double ch4value = Controller1.Axis1.position(percent);  //右摇杆
-  
-
+void Chassis_Controller() {
+  static bool Gyro_state = false;  // 陀螺仪开启
+  static int8_t Chassis_Dir = 1;   // 改方向
+  double ch3value = Chassis_Dir * Controller1.Axis3.position(percent); // 左摇杆
+  double ch4value = Controller1.Axis1.position(percent); // 右摇杆
 
   /*------一键切换车头与车尾的方向-------*/
-  //if(Controller1.ButtonDown.pressing()) {Chassis_Dir = -Chassis_Dir; wait(300,msec);}     //用于车体前后反向
-  
-  
+  // if(Controller1.ButtonDown.pressing()) {Chassis_Dir = -Chassis_Dir; wait(300,msec);}     // 用于车体前后反向
+
   // 防止摇杆死区
-  if (fabs(ch3value) < 5) {ch3value = 0;}
-  if (fabs(ch4value) < 5) {ch4value = 0;}
+  if (fabs(ch3value) < 5) { ch3value = 0; }
+  if (fabs(ch4value) < 5) { ch4value = 0; }
 
   /*----前进遥控非线性部分------*/
-  if(ch3value>0)        ch3value = (exp(ch3value/50))/7.389*100;
-  else if(ch3value<0)   ch3value = -(exp(-ch3value/50))/7.389*100;
+  if (ch3value > 0)
+    ch3value = (exp(ch3value / 50)) / 7.389 * 100;
+  else if (ch3value < 0)
+    ch3value = -(exp(-ch3value / 50)) / 7.389 * 100;
   /*----旋转遥控非线性部分------*/
-  if(ch4value>0)        ch4value = (exp(ch4value/50))/7.389*100; 
-  else if(ch4value<0)   ch4value = -(exp(-ch4value/50))/7.389*100;  //
-
-
+  if (ch4value > 0)
+    ch4value = (exp(ch4value / 50)) / 7.389 * 100;
+  else if (ch4value < 0)
+    ch4value = -(exp(-ch4value / 50)) / 7.389 * 100;
 
   // 映射到电机速度范围
   double leftSpeed = 0;
   double rightSpeed = 0;
-  //double Speed_MAX = 12;
+  // double Speed_MAX = 12;
   //------------------遥控器摇杆值映射至左右电机速度--------------------
-  if(ch3value != 0)//该情况下小车处于前进状态
+  if (ch3value != 0) // 该情况下小车处于前进状态
   {
-        if(ch4value >= 0)
-        {
-          leftSpeed = (ch3value + ch4value*0.7) * 12/100.0;
-          rightSpeed =(ch3value - ch4value*1.0) * 12/100.0;
-        }
-        if(ch4value < 0)
-        {
-          leftSpeed = (ch3value + ch4value*1.0) * 12/100.0;
-          rightSpeed =(ch3value - ch4value*0.7) * 12/100.0;
-        }
-  } 
-  else             //该情况下小车处于原地旋转 
+    if (ch4value >= 0) {
+      leftSpeed = (ch3value + ch4value * 0.7) * 12 / 100.0;
+      rightSpeed = (ch3value - ch4value * 1.0) * 12 / 100.0;
+    }
+    if (ch4value < 0) {
+      leftSpeed = (ch3value + ch4value * 1.0) * 12 / 100.0;
+      rightSpeed = (ch3value - ch4value * 0.7) * 12 / 100.0;
+    }
+  } else // 该情况下小车处于原地旋转
   {
-          leftSpeed  =  ch4value * 11/100.0;
-          rightSpeed = -ch4value * 11/100.0;
+    leftSpeed = ch4value * 11 / 100.0;
+    rightSpeed = -ch4value * 11 / 100.0;
   }
 
   //-----------------------无陀螺仪定向控制电机运动--------------------------
-  if(Gyro_state == false) {Chassis_Run(leftSpeed,rightSpeed);ch3_change = false;}
+  if (Gyro_state == false) {
+    Chassis_Run(leftSpeed, rightSpeed);
+    ch3_change = false;
+  }
 
-  
   //-----------------------陀螺仪定向控制电机运动--------------------------
-  if(Gyro_state == true)
-  {
-    if(ch4value == 0 && ch3value == 0) Chassis_Stop(1);
-    else if(ch4value == 0)//仅直线行驶时锁定航向
+  if (Gyro_state == true) {
+    if (ch4value == 0 && ch3value == 0)
+      Chassis_Stop(1);
+    else if (ch4value == 0) // 仅直线行驶时锁定航向
     {
-      if(ch3_change == false)
-      {
-        Gyro_Chassis = Gyro.rotation(); //更新一次角度,获取当前车体角度信息
-        ch3_change = true;    //更新标志位，第一次进入直线行驶PID程序,表示定向巡航角度已经更新
+      if (ch3_change == false) {
+        Gyro_Chassis = Gyro.rotation(); // 更新一次角度,获取当前车体角度信息
+        ch3_change = true;            // 更新标志位，第一次进入直线行驶PID程序,表示定向巡航角度已经更新
       }
-      Chassis_Gyro(leftSpeed,Gyro_Chassis);
-    }
-    else
-    {
-      Chassis_Run(leftSpeed,rightSpeed);
-      ch3_change = false; //更改首次直线行驶标志位
+      // 使用PID控制来调整左右电机速度
+      double leftSpeedPID = PID_Controller(leftSpeed, Gyro_Chassis); // 使用PID算法
+      double rightSpeedPID = PID_Controller(rightSpeed, Gyro_Chassis); // 使用PID算法
+      Chassis_Run(leftSpeedPID, rightSpeedPID);
+    } else {
+      Chassis_Run(leftSpeed, rightSpeed);
+      ch3_change = false; // 更改首次直线行驶标志位
     }
   }
 }
+
+
+
 /*===========================================================================*/
 
 

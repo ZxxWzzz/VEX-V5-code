@@ -31,10 +31,5 @@ void Auto_function(void)
   Task_state(false);
   Chassis_Forward(380,0,true,1);
 
-  //Rollmotor.spin(vex::directionType::fwd,100,vex::voltageUnits::volt);    
-  //left1.spin(vex::directionType::fwd,100,vex::voltageUnits::volt);  left2.spin(vex::directionType::fwd,100,vex::voltageUnits::volt); left3.spin(vex::directionType::fwd,100,vex::voltageUnits::volt);
-  //right1.spin(vex::directionType::fwd,100,vex::voltageUnits::volt);  right2.spin(vex::directionType::fwd,100,vex::voltageUnits::volt); right3.spin(vex::directionType::fwd,100,vex::voltageUnits::volt);
-
-
 }
 /*===========================================================================*/
