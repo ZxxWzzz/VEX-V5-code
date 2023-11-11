@@ -268,70 +268,73 @@ double Chassis_Angle(bool Angle_Type)
           Tolerance:可以容忍的误差大小,默认1°
 返 回 值： 无
 \*---------------END------------------*/
-void Chassis_Turn(double Aim_Angle,bool Angle_Type,bool Auto_User,double Tolerance)
-{
+void Chassis_Turn(double Aim_Angle, bool Angle_Type, bool Auto_User, double Tolerance) {
+  double Kp = 0.65;  // 比例系数
+  double Ki = 0.01;  // 积分系数，根据需要调整
+  double Kd = 0.1;   // 微分系数，根据需要调整
+
   double Angle_now = Chassis_Angle(0);
-  double Turn_Output = 0;
-  double Turn_err_now = 0;
-  double Turn_err_last = 0;
+  double Turn_Output = 0.0;
+  double Turn_err_now = 0.0;
+  double Turn_err_integral = 0.0;
+  double Turn_err_derivative = 0.0;
+  double prev_err = 0.0;
+
   uint8_t success_times = 0;
-  double Velocity_hold = 0;
-  bool Velocity_now = false;
 
-  if(Auto_User == false) {ch3_change = false;Task1_Chassis.suspend();}            //判断为手动程序，暂时关闭摇杆任务
+  if (Auto_User == false) {
+    ch3_change = false;
+    Task1_Chassis.suspend();
+  }  // 判断为手动程序，暂时关闭摇杆任务
 
-  if(Angle_Type == false) Aim_Angle = Aim_Angle + 360 * (int)(Angle_now/360);     //将输入变量转化为增量式角度即目标角度
-  else                    Aim_Angle = Aim_Angle + Angle_now;                      //将输入变量转化为目标角度
+  if (Angle_Type == false)
+    Aim_Angle = Aim_Angle + 360 * (int)(Angle_now / 360);  // 将输入变量转化为增量式角度即目标角度
+  else
+    Aim_Angle = Aim_Angle + Angle_now;  // 将输入变量转化为目标角度
 
-  if( abs(Aim_Angle - Angle_now)>180 ) Aim_Angle = Aim_Angle - 360.0f;           //最短角度旋转
+  if (abs(Aim_Angle - Angle_now) > 180)
+    Aim_Angle = Aim_Angle - 360.0f;  // 最短角度旋转
 
-  while(1)
-  {
+  while (1) {
     Angle_now = Chassis_Angle(0);
     Turn_err_now = Aim_Angle - Angle_now;
 
-    if(abs(Turn_err_now) < Tolerance)       
-    { 
-      success_times++;                               //瞬时完成
-      Chassis_Stop(3);                               //电磁刹车 提供阻尼
-      if(success_times >= 10) 
-      {
-        UI_test_data = Angle_now;                                    //----------------测试用
-        break;                 //完成稳定超过100ms，且误差小于0.5°时不再旋转，跳出循环
-      
+    if (abs(Turn_err_now) < Tolerance) {
+      success_times++;        // 瞬时完成
+      Chassis_Stop(3);        // 电磁刹车 提供阻尼
+      if (success_times >= 10) {
+        UI_test_data = Angle_now;  //----------------测试用
+        break;                     // 完成稳定超过100ms，且误差小于0.5°时不再旋转，跳出循环
       }
-    }
-
-    else
-    {
+    } else {
       success_times = 0;
-      Turn_Output = 0.6 * Turn_err_now;    //0.655
+      Turn_err_integral += Turn_err_now;
+      Turn_err_derivative = Turn_err_now - prev_err;
 
-      // 高阶限幅
-      if(abs(Turn_err_now)>10.0f)
-        Turn_Output = Limitdata(Turn_Output,100,-100);              //输出值限幅
-      else
-      {
-        if(Velocity_now == false)
-        {
-          Velocity_hold = Turn_Output;
-          Velocity_now = true;
-        }
-        if(Turn_Output>0) Turn_Output = abs(Velocity_hold);
-        else if(Turn_Output<0) Turn_Output = -abs(Velocity_hold);
+      // 计算 PID 输出
+      Turn_Output = Kp * Turn_err_now + Ki * Turn_err_integral + Kd * Turn_err_derivative;
+
+      // 控制输出范围
+      if (Turn_Output > 0) {
+        Turn_Output = fabs(Turn_Output);
+        Chassis_Run(Turn_Output, -Turn_Output, 2, 3);  // 输出控制电机
+      } else {
+        Turn_Output = fabs(Turn_Output);
+        Chassis_Run(-Turn_Output, Turn_Output, 2, 3);  // 输出控制电机
       }
-      
-      Turn_Output = Limitdata(Turn_Output,100,-100);              //输出值限幅
-      Chassis_Run(Turn_Output,-Turn_Output,2,3);    //输出控制电机
-      Turn_err_last = Turn_err_now;
-    }
-    
 
-    if( Controller1.Axis3.position(percent) >= 50 || Controller1.Axis3.position(percent) <= -50) break;   //前进摇杆百分比>50%, 可强行退出旋转
-    wait(1,msec);
+      prev_err = Turn_err_now;
+    }
+
+    if (Controller1.Axis3.position(percent) >= 50 || Controller1.Axis3.position(percent) <= -50)
+      break;  // 前进摇杆百分比>50%, 可强行退出旋转
+
+    wait(20, msec);  // 控制频率
   }
-  Chassis_Stop(3);                              //刹车模式3 抱死刹车
-  if(Auto_User == false) Task1_Chassis.resume();
+
+  Chassis_Stop(3);  // 刹车模式3 抱死刹车
+
+  if (Auto_User == false) Task1_Chassis.resume();
 }
 /*===========================================================================*/
 
