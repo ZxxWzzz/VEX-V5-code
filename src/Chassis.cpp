@@ -27,8 +27,8 @@ double UI_test_data = 0;
 double PID_Controller(double target, double current) {
   // PID控制算法
   double Kp = 0.5; // 比例系数
-  double Ki = 0.1; // 积分系数
-  double Kd = 0.2; // 微分系数
+  double Ki = 0.05; // 积分系数
+  double Kd = 0.1; // 微分系数
   static double prevError = 0;
   static double integral = 0;
   
@@ -269,8 +269,8 @@ double Chassis_Angle(bool Angle_Type)
 返 回 值： 无
 \*---------------END------------------*/
 void Chassis_Turn(double Aim_Angle, bool Angle_Type, bool Auto_User, double Tolerance) {
-  double Kp = 0.65;  // 比例系数
-  double Ki = 0.01;  // 积分系数，根据需要调整
+  double Kp = 0.45;  // 比例系数
+  double Ki = 0.0;  // 积分系数，根据需要调整
   double Kd = 0.1;   // 微分系数，根据需要调整
 
   double Angle_now = Chassis_Angle(0);
@@ -324,12 +324,13 @@ void Chassis_Turn(double Aim_Angle, bool Angle_Type, bool Auto_User, double Tole
       }
 
       prev_err = Turn_err_now;
+      if(prev_err<=1){prev_err = 0;} //限制
     }
 
     if (Controller1.Axis3.position(percent) >= 50 || Controller1.Axis3.position(percent) <= -50)
       break;  // 前进摇杆百分比>50%, 可强行退出旋转
 
-    wait(20, msec);  // 控制频率
+    wait(1, msec);  // 控制频率
   }
 
   Chassis_Stop(3);  // 刹车模式3 抱死刹车
@@ -351,55 +352,55 @@ void Chassis_Turn(double Aim_Angle, bool Angle_Type, bool Auto_User, double Tole
           当前车的换算比为    2.637°/mm
 返 回 值： 无 
 \*---------------END------------------*/
-void Chassis_Forward(double Aim_Distance,double Aim_Angle,bool Auto_User,double Tolerance)
-{
-  double Forward_now = 0;
-  double Forward_Output = 0;
-  double Forward_err_now = 0;
-  uint8_t success_times = 0;
-  bool Velocity_now = false;
-  double Velocity_hold = 0;
-  Aim_Distance = Aim_Distance * 2.637f; //单位换算
-  Tolerance = Tolerance*4.0f;         //单位换算
-  left1.resetRotation();         //复位左电机编码器
- 
+void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User, double Tolerance) {
+    double Kp = 0.03;  // 比例系数
+    double Ki = 0.000006;  // 积分系数
+    double Kd = 0.025;  // 微分系数
 
-  while(1)
-  {
-    Forward_now = left1.rotation(deg);
-    Forward_err_now = Aim_Distance - Forward_now;     //误差一 目标区域误差
+    double Forward_now = 0;
+    double Forward_err_now = 0;
+    double Forward_err_integral = 0;
+    double Forward_err_derivative = 0;
+    double prev_err = 0;
 
-    if(abs(Forward_err_now)<Tolerance)               //任务完成判定部分
-    {
-      success_times++;
-      Chassis_Stop(3);                               //电磁刹车 提供阻尼
-      UI_test_data = Forward_err_now;                //测试用 
-      if(success_times >= 10) break;                 //完成稳定超过10*2ms，且误差小于0.5°时不再旋转，跳出循环
-    }
-    else
-    {
-      success_times = 0;
-      Forward_Output = 15/200.0f * Forward_err_now;
-      
-      if(abs(Forward_err_now)>200.0f)
-        Forward_Output = Limitdata(Forward_Output,100,-100);              //输出值限幅
-      else
-      {
-        if(Velocity_now == false)
-        {
-          Velocity_hold = Forward_Output;
-          Velocity_now = true;
+    Aim_Distance = Aim_Distance * 2.637f;  // 单位换算
+    Tolerance = Tolerance * 4.0f;          // 单位换算
+
+    left1.resetRotation();  // 复位左电机编码器
+
+    while (1) {
+        Forward_now = left1.rotation(deg);
+        Forward_err_now = Aim_Distance - Forward_now;  // 误差一 目标区域误差
+
+        if (abs(Forward_err_now) < Tolerance) {  // 任务完成判定部分
+            Chassis_Stop(3);                    // 电磁刹车 提供阻尼
+            UI_test_data = Forward_err_now;     // 测试用
+            break;                              // 完成稳定超过10*2ms，且误差小于0.5°时不再旋转，跳出循环
+        } else {
+            Forward_err_integral += Forward_err_now;
+            Forward_err_derivative = Forward_err_now - prev_err;
+
+            // 计算 PID 输出
+            double Forward_Output = Kp * Forward_err_now + Ki * Forward_err_integral + Kd * Forward_err_derivative;
+
+            // 输出值限幅
+            Forward_Output = Limitdata(Forward_Output, 40, -40);  //自动限速，修改为50上限
+
+            // 使用PID算法控制前进速度
+            Chassis_Gyro(Forward_Output, Aim_Angle, 2, 3);
         }
-        if(Forward_Output>0) Forward_Output = abs(Velocity_hold);
-        else if(Forward_Output<0) Forward_Output = -abs(Velocity_hold);
-      }
-      Chassis_Gyro(Forward_Output, Aim_Angle,2,3);
+
+        UI_test_data = Forward_err_now;  // 测试用，用于控制器上误差显示
+        wait(1, msec);
+
+        prev_err = Forward_err_now;      
+        if(prev_err<40){prev_err = 0;} //限制
+
     }
-    UI_test_data = Forward_err_now;             //测试用，用于控制器上误差显示
-    wait(2,msec);
-  }
-  Chassis_Stop(3);                              //刹车模式3 抱死刹车
+
+    Chassis_Stop(3);  // 刹车模式3 抱死刹车
 }
+
 /*===========================================================================*/
 
 

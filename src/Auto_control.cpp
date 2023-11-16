@@ -29,7 +29,24 @@
 void Auto_function(void)
 {
   Task_state(false);
-  Chassis_Forward(380,0,true,1);
+/*=========第一段==========*/
+  Rollmotor.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
+  Chassis_Run(30,30);
+  wait(350, msec);
+  Chassis_Forward(-710,0,true,1);
+  Chassis_Turn(-45);
+  Chassis_Forward(-270,0,true,1);
+  Chassis_Turn(-45);
+
+/*========================*/
+
+  // Chassis_Turn(90);
+  // wait(100, msec);
+  // Chassis_Turn(-90);
+  // wait(300, msec);
+  // Chassis_Forward(180,0,true,1);
+  // wait(300, msec);
+  // Chassis_Forward(-180,0,true,1);
 
 }
 /*===========================================================================*/
