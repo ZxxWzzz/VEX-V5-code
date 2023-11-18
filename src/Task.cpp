@@ -129,7 +129,7 @@ int Task_STOP()
 {
   while(1)
   {
-    if(Controller1.ButtonDown.pressing())
+    if(Controller1.ButtonDown.pressing()&&Controller1.ButtonLeft.pressing())
     {
       while(1)
         Chassis_Stop(3);

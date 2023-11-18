@@ -277,7 +277,7 @@ void Chassis_Turn(double Aim_Angle, double Speed_MAX,bool Angle_Type, bool Auto_
   double Ki = 0.00009;  // 积分系数，根据需要调整
   double Kd = 0.1;   // 微分系数，根据需要调整
 
-  double Toleranc = 2;//允许误差
+  double Toleranc = 2.7;//允许误差
 
   double Angle_now = Chassis_Angle(0);
   double Turn_Output = 0.0;
@@ -362,10 +362,10 @@ void Chassis_Turn(double Aim_Angle, double Speed_MAX,bool Angle_Type, bool Auto_
 返 回 值： 无 
 \*---------------END------------------*/
 void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User,  double Speed_MAX) {
-    double Kp = 0.03;  // 比例系数
+    double Kp = 0.07;  // 比例系数
     double Ki = 0.000006;  // 积分系数
     double Kd = 0.025;  // 微分系数
-    double Tolerance = 1; //允许误差
+    double Tolerance = 2; //允许误差
     double Forward_now = 0;
     double Forward_err_now = 0;
     double Forward_err_integral = 0;
@@ -412,7 +412,7 @@ void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User,  dou
 /*===========================================================================*/
 
 
-/*------------自动弧线运行程序----------*\
+/*------------自动弧线运行程序(未起用)----------*\
 函数功能： 控制车体弧线运行
 依    赖： Chassis_Run()，
 输入变量： radius：半径
