@@ -14,9 +14,9 @@ void Chassis_Gyro(double run_Speed,double Gyro_target,uint8_t Speed_mode = 1,uin
                                                          //控制底盘以'run_Speed'速度沿着'Gyro_target'角度运动
 void Gyro_calibrate(bool waitfinish=false);               //陀螺仪矫正程序，默认等待完成
 double Chassis_Angle(bool Angle_Type=true);              //底盘角度读取，默认为0~360°
-void Chassis_Turn(double Aim_Angle,bool Angle_Type=true,bool Auto_User=true,double Tolerance=1.0f);                
+void Chassis_Turn(double Aim_Angle,double Speed_MAX = 100,bool Angle_Type=true,bool Auto_User=true);                
                                                          //底盘旋转'Angle'度,默认为基于当前位置旋转
-void Chassis_Forward(double Aim_Distance,double Aim_Angle,bool Auto_User=true,double Tolerance=1.0f);
+void Chassis_Forward(double Aim_Distance,double Aim_Angle,bool Auto_User=true,double Speed_MAX = 100);
                                                          //底盘前进'Aim_Distance'单位,默认为基于当前位置旋转
 
 

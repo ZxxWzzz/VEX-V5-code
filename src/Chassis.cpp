@@ -26,9 +26,9 @@ double UI_test_data = 0;
 //新加入PID算法，在下方底盘控制程序中应用该方法
 double PID_Controller(double target, double current) {
   // PID控制算法
-  double Kp = 0.5; // 比例系数
-  double Ki = 0.05; // 积分系数
-  double Kd = 0.1; // 微分系数
+  double Kp = 0.8; // 比例系数
+  double Ki = 0.0000; // 积分系数
+  double Kd = 0.; // 微分系数
   static double prevError = 0;
   static double integral = 0;
   
@@ -268,10 +268,12 @@ double Chassis_Angle(bool Angle_Type)
           Tolerance:可以容忍的误差大小,默认1°
 返 回 值： 无
 \*---------------END------------------*/
-void Chassis_Turn(double Aim_Angle, bool Angle_Type, bool Auto_User, double Tolerance) {
-  double Kp = 0.45;  // 比例系数
-  double Ki = 0.0;  // 积分系数，根据需要调整
+void Chassis_Turn(double Aim_Angle, double Speed_MAX,bool Angle_Type, bool Auto_User) {
+  double Kp = 0.65;  // 比例系数
+  double Ki = 0.00009;  // 积分系数，根据需要调整
   double Kd = 0.1;   // 微分系数，根据需要调整
+
+  double Toleranc = 2;//允许误差
 
   double Angle_now = Chassis_Angle(0);
   double Turn_Output = 0.0;
@@ -299,7 +301,7 @@ void Chassis_Turn(double Aim_Angle, bool Angle_Type, bool Auto_User, double Tole
     Angle_now = Chassis_Angle(0);
     Turn_err_now = Aim_Angle - Angle_now;
 
-    if (abs(Turn_err_now) < Tolerance) {
+    if (abs(Turn_err_now) < Toleranc) {
       success_times++;        // 瞬时完成
       Chassis_Stop(3);        // 电磁刹车 提供阻尼
       if (success_times >= 10) {
@@ -313,6 +315,8 @@ void Chassis_Turn(double Aim_Angle, bool Angle_Type, bool Auto_User, double Tole
 
       // 计算 PID 输出
       Turn_Output = Kp * Turn_err_now + Ki * Turn_err_integral + Kd * Turn_err_derivative;
+
+      Turn_Output = Limitdata(Turn_Output, Speed_MAX, -Speed_MAX);  //自动限速
 
       // 控制输出范围
       if (Turn_Output > 0) {
@@ -349,14 +353,15 @@ void Chassis_Turn(double Aim_Angle, bool Angle_Type, bool Auto_User, double Tole
           Auto_User:自动/手动    true  -> 自动中使用(默认)
                                 false -> 手动中使用
           Tolerance:可以容忍的误差大小,默认1.0°
+          Speed_MAX:移动限速
           当前车的换算比为    2.637°/mm
 返 回 值： 无 
 \*---------------END------------------*/
-void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User, double Tolerance) {
+void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User,  double Speed_MAX) {
     double Kp = 0.03;  // 比例系数
     double Ki = 0.000006;  // 积分系数
     double Kd = 0.025;  // 微分系数
-
+    double Tolerance = 1; //允许误差
     double Forward_now = 0;
     double Forward_err_now = 0;
     double Forward_err_integral = 0;
@@ -384,7 +389,7 @@ void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User, doub
             double Forward_Output = Kp * Forward_err_now + Ki * Forward_err_integral + Kd * Forward_err_derivative;
 
             // 输出值限幅
-            Forward_Output = Limitdata(Forward_Output, 40, -40);  //自动限速，修改为50上限
+            Forward_Output = Limitdata(Forward_Output, Speed_MAX, -Speed_MAX);  //自动限速
 
             // 使用PID算法控制前进速度
             Chassis_Gyro(Forward_Output, Aim_Angle, 2, 3);

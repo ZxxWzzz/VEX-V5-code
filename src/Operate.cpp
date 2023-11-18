@@ -37,37 +37,37 @@ void climber(bool Button_a,bool Button_b)
 \*---------------END------------------*/
 void roller(bool Button_a,bool Button_b)
 {
-// static int Run_ball_flag = 0;
-// static int Collect_delay = 0;
-// static int Collect_flag = 0;    //0表示收球进程 1表示吐球进程
+  static int Run_ball_flag = 0;
+  static int Collect_delay = 0;
+  static int Collect_flag = 0;    //0表示收球进程 1表示吐球进程
 /*------------------------------滚筒装置------------------------------*/
 if(Button_a)   //正转滚筒
 {
-  // Run_ball_flag = !Run_ball_flag;
+  Run_ball_flag = !Run_ball_flag;
   Rollmotor.spin(vex::directionType::fwd,100,vex::voltageUnits::volt);    //A 正转 B反转
   wait(200, msec); //程序按键消抖
-  // Collect_flag = 0;
+  Collect_flag = 0;
 }
 else if(Button_b)   //反转滚筒
 {
-  // Run_ball_flag = !Run_ball_flag;
+  Run_ball_flag = !Run_ball_flag;
   Rollmotor.spin(vex::directionType::rev,100,vex::voltageUnits::volt);
   wait(200, msec); //程序按键消抖
-  // Collect_flag = 1;
+  Collect_flag = 1;
 }
 /*---------------------------------------------------------------------*/
 
 /*---------------------滚筒电机堵转保护程序-----------------------------*/
-// if (Rollmotor.velocity(pct) == 0 ) 
-// {
-//   Collect_delay++;
-// }
-// if (Collect_delay > 60) 
-// {
-//   Rollmotor.stop(vex::brakeType::hold);
-//   Run_ball_flag = 0;
-//   Collect_delay = 0;
-// }
+  if (Rollmotor.velocity(pct) == 0 ) 
+  {
+    Collect_delay++;
+  }
+  if (Collect_delay > 60) 
+  {
+    Rollmotor.stop(vex::brakeType::hold);
+    Run_ball_flag = 0;
+    Collect_delay = 0;
+  }
 }
 
 /*-------------弹射控制---------------*\
