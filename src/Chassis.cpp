@@ -3,6 +3,10 @@
 #include "math_function.h"
 #include "robot-config.h"
 #include "Task.h"
+#include "vex.h"
+#include "iostream"
+
+
 /*------------------------工程相关信息------------------------------*\
 作    者：翁老师
 文 件 名：底盘控制程序
@@ -405,8 +409,61 @@ void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User,  dou
 
     Chassis_Stop(3);  // 刹车模式3 抱死刹车
 }
-
 /*===========================================================================*/
 
 
+/*------------自动弧线运行程序----------*\
+函数功能： 控制车体弧线运行
+依    赖： Chassis_Run()，
+输入变量： radius：半径
+          radians：弧度
+          当前车的换算比为    2.637°/mm
+返 回 值： 无 
+\*---------------END------------------*/
+const double wheelBase = 28.5; // 假设机器人轮子之间的距离（单位：厘米）
 
+void Chassis_Arc(double radius, double angle) {
+    // 计算内外轮半径
+    double innerRadius = radius - wheelBase / 2;
+    double outerRadius = radius + wheelBase / 2;
+
+    // 计算速度比例并设置最大速度
+    double speedRatio = innerRadius / outerRadius;
+    double maxSpeed = 10.0; // 假定最大速度
+
+    // 根据顺时针方向调整速度
+    double innerSpeed = (angle >= 0) ? maxSpeed * speedRatio : -maxSpeed * speedRatio;
+    double outerSpeed = (angle >= 0) ? maxSpeed : -maxSpeed;
+
+    // 设置电机速度
+    Chassis_Run(innerSpeed, outerSpeed);
+
+    // 获取当前陀螺仪角度并计算目标角度
+    double initialAngle = Chassis_Angle(false);
+    double targetAngle = initialAngle + angle;
+
+    while (true) {
+        double currentAngle = Chassis_Angle(false);
+        double angleDiff = currentAngle - initialAngle;
+
+        // 处理角度跨越360度的情况
+        if (angleDiff > 180) {
+            angleDiff -= 360;
+        } else if (angleDiff < -180) {
+            angleDiff += 360;
+        }
+
+        // 判断是否达到目标角度
+        if (angle >= 0 && angleDiff >= angle) {
+            break;
+        } else if (angle < 0 && angleDiff <= angle) {
+            break;
+        }
+
+        wait(1, msec);
+    }
+
+    // 停止电机
+    Chassis_Stop();
+}
+/*===========================================================================*/

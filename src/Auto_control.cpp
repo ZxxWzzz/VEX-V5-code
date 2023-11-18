@@ -30,8 +30,7 @@ void Auto_function(void)
 {
   Task_state(false);
 
-  Chassis_Forward(1000,90,true,27);
-
+  Chassis_Arc(10, 30);
 /*=========第一段==========*/
   // Rollmotor.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
   // Chassis_Forward(200,0,true,27);
