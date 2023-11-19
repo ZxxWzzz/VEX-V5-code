@@ -137,7 +137,7 @@ void gua(bool Button_a) {
             cegua.spin(forward, 100, pct); // 启动电机（正向）
         }
 
-        wait(350, msec);  // 等待0.35秒
+        wait(390, msec);  // 等待0.42秒
         cegua.stop();     // 停止电机
         cegua.setBrake(vex::brakeType::hold);  // 锁死电机
     }
