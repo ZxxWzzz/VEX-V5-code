@@ -21,7 +21,6 @@
 
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
-
 competition Competition;
 
 //多线程显示区域

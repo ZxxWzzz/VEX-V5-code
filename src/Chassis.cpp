@@ -277,7 +277,7 @@ void Chassis_Turn(double Aim_Angle, double Speed_MAX,bool Angle_Type, bool Auto_
   double Ki = 0.00009;  // 积分系数，根据需要调整
   double Kd = 0.1;   // 微分系数，根据需要调整
 
-  double Toleranc = 2.7;//允许误差
+  double Toleranc = 2.0;//允许误差
 
   double Angle_now = Chassis_Angle(0);
   double Turn_Output = 0.0;
@@ -411,59 +411,36 @@ void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User,  dou
 }
 /*===========================================================================*/
 
-
-/*------------自动弧线运行程序(未起用)----------*\
-函数功能： 控制车体弧线运行
-依    赖： Chassis_Run()，
-输入变量： radius：半径
-          radians：弧度
-          当前车的换算比为    2.637°/mm
+/*-----自动阶段控制电机移动指定角度---------*\
+函数功能： 自动阶段控制电机移动指定角度
+依    赖： 陀螺仪、底盘电机
+输入变量： targetAngle：目标角度
+          speedLeft：左侧电机速度
+          speedRight：右侧电机速度
 返 回 值： 无 
 \*---------------END------------------*/
-const double wheelBase = 28.5; // 假设机器人轮子之间的距离（单位：厘米）
 
-void Chassis_Arc(double radius, double angle) {
-    // 计算内外轮半径
-    double innerRadius = radius - wheelBase / 2;
-    double outerRadius = radius + wheelBase / 2;
+// Gyro.resetRotation();
 
-    // 计算速度比例并设置最大速度
-    double speedRatio = innerRadius / outerRadius;
-    double maxSpeed = 10.0; // 假定最大速度
+void Chassis_DriveToAngle(double targetAngle, double speedLeft, double speedRight) {
+    const double tolerance = 3.5; // 允许误差范围
+    Gyro.resetRotation(); //陀螺仪重置为0
 
-    // 根据顺时针方向调整速度
-    double innerSpeed = (angle >= 0) ? maxSpeed * speedRatio : -maxSpeed * speedRatio;
-    double outerSpeed = (angle >= 0) ? maxSpeed : -maxSpeed;
+    // 循环直到达到目标角度
+    while(true) {
+        double currentAngle = Chassis_Angle(0); // 读取当前角度
 
-    // 设置电机速度
-    Chassis_Run(innerSpeed, outerSpeed);
+        // 显示当前角度到控制器屏幕
+        Controller1.Screen.clearLine(1); // 清除之前的输出
+        Controller1.Screen.print("Auto Angle: %.2f", currentAngle);
 
-    // 获取当前陀螺仪角度并计算目标角度
-    double initialAngle = Chassis_Angle(false);
-    double targetAngle = initialAngle + angle;
-
-    while (true) {
-        double currentAngle = Chassis_Angle(false);
-        double angleDiff = currentAngle - initialAngle;
-
-        // 处理角度跨越360度的情况
-        if (angleDiff > 180) {
-            angleDiff -= 360;
-        } else if (angleDiff < -180) {
-            angleDiff += 360;
+        // 检查是否在目标角度的容差范围内
+        if(fabs(currentAngle - (targetAngle-5))<= tolerance) {
+            Chassis_Stop(); // 停止底盘
+            break; // 退出循环
+        } else {
+            Chassis_Run(speedLeft, speedRight); // 控制底盘运动
         }
-
-        // 判断是否达到目标角度
-        if (angle >= 0 && angleDiff >= angle) {
-            break;
-        } else if (angle < 0 && angleDiff <= angle) {
-            break;
-        }
-
-        wait(1, msec);
+        wait(1, msec); // 稍微延迟以防止CPU过载
     }
-
-    // 停止电机
-    Chassis_Stop();
 }
-/*===========================================================================*/
