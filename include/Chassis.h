@@ -18,7 +18,7 @@ void Chassis_Turn(double Aim_Angle,double Speed_MAX = 100,bool Angle_Type=true,b
                                                          //底盘旋转'Angle'度,默认为基于当前位置旋转
 void Chassis_Forward(double Aim_Distance,double Aim_Angle,bool Auto_User=true,double Speed_MAX = 100);
                                                          //底盘前进'Aim_Distance'单位,默认为基于当前位置旋转
-void Chassis_DriveToAngle(double targetAngle, double speedLeft, double speedRight);
+void Chassis_DriveToAngle(double targetAngle, double maxSpeedL,double maxSpeedR);
                                                           //自动阶段电机运动角度方法
 
 /*--------------------------------END-------------------------------------*/

@@ -45,70 +45,91 @@ bool angleDetection(double targetAngle) {
 返 回 值： 无
 备    注： 左旋转陀螺仪返回值为负，右旋转为正
 \*---------------END--------------*/
-void Auto_function(void)
+void Auto_function_far(void)
 {
   Task_state(false);
 
-/*========自动阶段测试======*/
-  // Chassis_DriveToAngle(-90, -3.6, 0);
+  /*========自动阶段测试======*/
+  // Chassis_DriveToAngle(-130, 4, -0.5);
 
-// Chassis_Turn(90);
-// Chassis_DriveToAngle(90, 5, 0);
+  // Chassis_Turn(90);
+  // Chassis_DriveToAngle(90, 5, 0);
 
-/*========================*/
+  /*========================*/
 
 
 
-/*=======第一段（两球）=====*/
+  /*=======第一段（两球）=====*/
   Rollmotor.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
   Chassis_Forward(100,0,true); 
-  Chassis_Forward(-700,0,true);
+  Chassis_Forward(-680,0,true);
 
   Chassis_Run(-9.5,-4);
-  wait(1000, msec);
+  wait(950, msec);
   Chassis_Stop();
 
   Chassis_Run(-50,-50);
-  wait(350, msec);
+  wait(450, msec);
   Chassis_Stop();
 
-  Chassis_Forward(150,0,true,35); //慢
-  Chassis_Stop();
+  Chassis_Forward(150,0,true); 
 
-  Chassis_Turn(160,35);
+  Chassis_Turn(160,35); 
+
   Chassis_Run(50,50);
   Rollmotor.stop();
   wait(550, msec);
   Chassis_Stop();
 
-  Chassis_Forward(-300,0,true,45);
-  Chassis_Turn(-50,35);
-/*========================*/
+  Chassis_Forward(-300,0,true);
+  Chassis_Turn(-50,35); //朝第三球方向，可调整
+  /*========================*/
 
-/*=====第二阶段（一球）=====*/
+  /*=====第二阶段（一球）=====*/
   Rollmotor.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
-  Chassis_Forward(980,0,true);
+  Chassis_Forward(980,0,true); //前进收第三球
 
-  Chassis_Turn(128,35); //冲撞角度  需要调整！！！
+  Chassis_Turn(115,35); //冲撞角度  需要调整！！！
+  Chassis_Forward(400,0,true);
+  Chassis_Turn(26); //调整角度  需要调整！！！
+
+  Rollmotor.stop();
 
   Chassis_Run(70,70);
   wait(500, msec);
-  Chassis_Run(12,12);
-  wait(200, msec);
-  Chassis_Stop(3);
-/*========================*/
+  Chassis_Stop();
 
-  wait(500, msec);  //测试
+  wait(10, msec); //test
 
-/*=====第三阶段（两球）=====*/
+  /*========================*/
+
+  /*=====第三阶段（两球）=====*/
+
   Rollmotor.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
 
-  Chassis_DriveToAngle(-140, -3, 0);
+  Chassis_DriveToAngle(-125, 5, -0.5); 
 
-  wait(500, msec);  //测试
+  Chassis_Forward(540,0,true,45);
+  wait(500, msec);
 
-/*========================*/
+  Chassis_Turn(120,45);
+
+  Chassis_Run(50, 50);
+  wait(700, msec);
+  Chassis_Stop();
+  Rollmotor.stop();
+  /*========================*/
 
 
 }
 /*===========================================================================*/
+
+void Auto_function_near(void){
+  /*========角球========*/
+  cegua.spin(reverse, 100, pct);
+  wait(650, msec);  // 等待0.65秒
+  cegua.stop();     // 停止电机
+  cegua.setBrake(vex::brakeType::hold);  // 锁死电机
+  /*===================*/
+
+}

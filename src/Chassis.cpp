@@ -47,6 +47,7 @@ double PID_Controller(double target, double current) {
   return output;
 }
 
+
 double Gyro_Chassis = 0.0f;
 bool ch3_change = false;                                  
 void Chassis_Controller() {
@@ -273,6 +274,8 @@ double Chassis_Angle(bool Angle_Type)
 返 回 值： 无
 \*---------------END------------------*/
 void Chassis_Turn(double Aim_Angle, double Speed_MAX,bool Angle_Type, bool Auto_User) {
+  Gyro.resetRotation(); //陀螺仪重置为0
+
   double Kp = 0.65;  // 比例系数
   double Ki = 0.00009;  // 积分系数，根据需要调整
   double Kd = 0.1;   // 微分系数，根据需要调整
@@ -364,8 +367,8 @@ void Chassis_Turn(double Aim_Angle, double Speed_MAX,bool Angle_Type, bool Auto_
 void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User,  double Speed_MAX) {
     double Kp = 0.07;  // 比例系数
     double Ki = 0.000006;  // 积分系数
-    double Kd = 0.025;  // 微分系数
-    double Tolerance = 2; //允许误差
+    double Kd = 0.04;  // 微分系数
+    double Tolerance = 4; //允许误差
     double Forward_now = 0;
     double Forward_err_now = 0;
     double Forward_err_integral = 0;
@@ -422,25 +425,43 @@ void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User,  dou
 
 // Gyro.resetRotation();
 
-void Chassis_DriveToAngle(double targetAngle, double speedLeft, double speedRight) {
+void Chassis_DriveToAngle(double targetAngle, double maxSpeedL,double maxSpeedR) {
     const double tolerance = 3.5; // 允许误差范围
-    Gyro.resetRotation(); //陀螺仪重置为0
+    double Kp = 0.5; // 比例系数
+    double Ki = 0.0; // 积分系数
+    double Kd = 0.45; // 微分系数
+
+    double integral = 0.0;
+    double previous_error = 0.0;
+
+    Gyro.resetRotation(); // 陀螺仪重置为0
 
     // 循环直到达到目标角度
     while(true) {
         double currentAngle = Chassis_Angle(0); // 读取当前角度
+        double error = targetAngle - currentAngle;
+        integral += error;
+        double derivative = error - previous_error;
+
+        // 计算PID输出
+        double output = Kp * error + Ki * integral + Kd * derivative;
+        previous_error = error;
 
         // 显示当前角度到控制器屏幕
         Controller1.Screen.clearLine(1); // 清除之前的输出
         Controller1.Screen.print("Auto Angle: %.2f", currentAngle);
 
         // 检查是否在目标角度的容差范围内
-        if(fabs(currentAngle - (targetAngle-5))<= tolerance) {
+        if(fabs(error) <= tolerance) {
             Chassis_Stop(); // 停止底盘
             break; // 退出循环
         } else {
+            // 根据PID输出调整左右轮速度
+            double speedLeft = maxSpeedL * sgn(output);
+            double speedRight = -maxSpeedR * sgn(output);
             Chassis_Run(speedLeft, speedRight); // 控制底盘运动
         }
         wait(1, msec); // 稍微延迟以防止CPU过载
     }
+    Chassis_Stop(3);
 }
