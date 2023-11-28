@@ -107,12 +107,12 @@ void Auto_function_far(void)
 
   Rollmotor.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
 
-  Chassis_DriveToAngle(-125, 5, -0.5); 
+  Chassis_DriveToAngle(-140, 5, -0.5); //倒退单电机角度！！！重点调整
 
-  Chassis_Forward(540,0,true,45);
+  Chassis_Forward(550,0,true,45); //第四球前进距离！！！ 重点调整
   wait(500, msec);
 
-  Chassis_Turn(120,45);
+  Chassis_Turn(95,35);  
 
   Chassis_Run(50, 50);
   wait(700, msec);

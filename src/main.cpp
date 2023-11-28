@@ -31,7 +31,7 @@ void pre_auton(void)   //**
 }
 
 //自动模式
-void autonomous(void){Auto_function();}     //自动程序
+void autonomous(void){Auto_function_far();}     //自动程序
 //手动模式
 void usercontrol(void){User_function();}    //手动程序
 
