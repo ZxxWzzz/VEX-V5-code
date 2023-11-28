@@ -37,7 +37,7 @@ void  User_function(void)
     Rollmotor.spin(vex::directionType::fwd,20,vex::velocityUnits::pct);
     shooter(Controller1.ButtonY.pressing());                                    //弹射：按着就启动，松开就停
     climber(Controller1.ButtonL2.pressing(),Controller1.ButtonL1.pressing());   //爬升：一个上，一个下，松开就停
-    roller(Controller1.ButtonR2.pressing(),Controller1.ButtonR1.pressing());    //按下就一直转，有防堵转
+    roller(Controller1.ButtonR1.pressing(),Controller1.ButtonR2.pressing());    //按下就一直转，有防堵转
     gua(Controller1.ButtonA.pressing());         //侧挂程序
     // ============================================================================================================
     // Task1_Chassis.resume();

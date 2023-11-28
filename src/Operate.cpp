@@ -35,38 +35,40 @@ void climber(bool Button_a,bool Button_b)
           
 返 回 值： 无
 \*---------------END------------------*/
-void roller(bool Button_a,bool Button_b)
+void roller(bool Button_a, bool Button_b)
 {
-  static int Run_ball_flag = 0;
-  static int Collect_delay = 0;
-  static int Collect_flag = 0;    //0表示收球进程 1表示吐球进程
-/*------------------------------滚筒装置------------------------------*/
-if(Button_a)   //正转滚筒
-{
-  Run_ball_flag = !Run_ball_flag;
-  Rollmotor.spin(vex::directionType::fwd,100,vex::voltageUnits::volt);    //A 正转 B反转
-  wait(200, msec); //程序按键消抖
-  Collect_flag = 0;
-}
-else if(Button_b)   //反转滚筒
-{
-  Run_ball_flag = !Run_ball_flag;
-  Rollmotor.spin(vex::directionType::rev,100,vex::voltageUnits::volt);
-  wait(200, msec); //程序按键消抖
-  Collect_flag = 1;
-}
-/*---------------------------------------------------------------------*/
+  static bool isCollecting = false; // 标志表示是否正在吸球
+  static bool isEjecting = false;   // 标志表示是否正在吐球
 
-/*---------------------滚筒电机堵转保护程序-----------------------------*/
-  if (Rollmotor.velocity(pct) == 0 ) 
-  {
-    Collect_delay++;
+  // 吸球控制
+  if (Button_a) {
+    if (!isCollecting) { // 如果当前没有在吸球，则开始吸球
+      isCollecting = true;
+      isEjecting = false; // 停止吐球
+    } else {
+      isCollecting = false; // 如果已经在吸球，则停止
+    }
+    wait(150, msec); // 按键消抖
   }
-  if (Collect_delay > 60) 
-  {
-    Rollmotor.stop(vex::brakeType::hold);
-    Run_ball_flag = 0;
-    Collect_delay = 0;
+
+  // 吐球控制
+  if (Button_b) {
+    if (!isEjecting) { // 如果当前没有在吐球，则开始吐球
+      isEjecting = true;
+      isCollecting = false; // 停止吸球
+    } else {
+      isEjecting = false; // 如果已经在吐球，则停止
+    }
+    wait(150, msec); // 按键消抖
+  }
+
+  // 根据当前状态控制电机
+  if (isCollecting) {
+    Rollmotor.spin(vex::directionType::fwd, 100, vex::voltageUnits::volt);
+  } else if (isEjecting) {
+    Rollmotor.spin(vex::directionType::rev, 100, vex::voltageUnits::volt);
+  } else {
+    Rollmotor.stop(vex::brakeType::coast);
   }
 }
 
