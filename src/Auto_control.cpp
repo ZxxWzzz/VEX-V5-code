@@ -72,7 +72,10 @@ void Auto_function_far(void)
   wait(450, msec);
   Chassis_Stop();
 
-  Chassis_Forward(150,0,true); 
+  Chassis_Run(5,5);
+  wait(250, msec);
+  Chassis_Stop(3);
+  // Chassis_Forward(150,0,true); 
 
   Chassis_Turn(160,35); 
 
@@ -87,16 +90,18 @@ void Auto_function_far(void)
 
   /*=====第二阶段（一球）=====*/
   Rollmotor.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
-  Chassis_Forward(980,0,true); //前进收第三球
+  Chassis_Forward(990,0,true); //前进收第三球
+  wait(200, msec);
+
 
   Chassis_Turn(115,35); //冲撞角度  需要调整！！！
-  Chassis_Forward(400,0,true);
+  Chassis_Forward(380,0,true);
   Chassis_Turn(26); //调整角度  需要调整！！！
 
   Rollmotor.stop();
 
   Chassis_Run(70,70);
-  wait(500, msec);
+  wait(400, msec);
   Chassis_Stop();
 
   wait(10, msec); //test
@@ -107,12 +112,19 @@ void Auto_function_far(void)
 
   Rollmotor.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
 
-  Chassis_DriveToAngle(-140, 5, -0.5); //倒退单电机角度！！！重点调整
+  Chassis_DriveToAngle(-130, 4.5, -0.5); //倒退单电机角度！！！重点调整4
+  Chassis_Stop(3);
+  wait(100, msec);
 
-  Chassis_Forward(550,0,true,45); //第四球前进距离！！！ 重点调整
-  wait(500, msec);
+  Chassis_Forward(560,-45,true,45); //第四球前进距离！！！ 重点调整
+  wait(350, msec);
 
-  Chassis_Turn(95,35);  
+  Chassis_Run(-5,-5);
+  wait(200, msec);
+  Chassis_Stop();
+  // Chassis_Forward(-100,0,true,45); //倒退防撞
+
+  Chassis_Turn(115,35);  
 
   Chassis_Run(50, 50);
   wait(700, msec);
@@ -130,6 +142,8 @@ void Auto_function_near(void){
   wait(650, msec);  // 等待0.65秒
   cegua.stop();     // 停止电机
   cegua.setBrake(vex::brakeType::hold);  // 锁死电机
+
+  Chassis_Turn(-45);
   /*===================*/
 
 }
