@@ -137,13 +137,46 @@ void Auto_function_far(void)
 /*===========================================================================*/
 
 void Auto_function_near(void){
+
+  Task_state(false);
+
+
   /*========角球========*/
-  cegua.spin(reverse, 100, pct);
-  wait(650, msec);  // 等待0.65秒
-  cegua.stop();     // 停止电机
+  Rollmotor.spin(vex::directionType::fwd,10,vex::velocityUnits::pct);
+
+  cegua.spin(reverse, 100, pct);  //侧挂电机运行
+  wait(650, msec); 
+  cegua.stop();     
   cegua.setBrake(vex::brakeType::hold);  // 锁死电机
 
-  Chassis_Turn(-45);
+  Chassis_Turn(-90,50);
+  wait(100, msec);
+  Chassis_Forward(850,0,true); //前进
+
   /*===================*/
+
+  /*=======预装球=======*/
+  Chassis_Turn(-110,50);
+  wait(250, msec);
+
+  Chassis_Run(50, 50);
+  wait(700, msec);
+  Chassis_Stop();
+  /*====================*/
+
+  cegua.spin(fwd, 100, pct);  //侧挂电机回收
+  wait(650, msec); 
+  cegua.stop();  
+
+  /*=======后撤=========*/
+  Chassis_Forward(-170,0,true); 
+  wait(100, msec);
+  Chassis_Turn(-88,35);
+
+  Chassis_Forward(900,0,true); 
+  Chassis_Turn(-90,30);
+  Chassis_Forward(800,0,true); 
+
+  /*====================*/
 
 }
