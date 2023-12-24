@@ -6,6 +6,14 @@
 #include "vex.h"
 #include "iostream"
 
+vex::timer T1;
+vex::timer T2;
+vex::timer T3;
+vex::timer T4;
+vex::timer TACC;
+
+int steps;
+
 
 /*------------------------工程相关信息------------------------------*\
 作    者：翁老师
@@ -414,7 +422,7 @@ void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User,  dou
 }
 /*===========================================================================*/
 
-/*-----自动阶段控制电机移动指定角度---------*\
+/*-----自动阶段控制电机移动指定角度------*\
 函数功能： 自动阶段控制电机移动指定角度
 依    赖： 陀螺仪、底盘电机
 输入变量： targetAngle：目标角度
@@ -464,4 +472,144 @@ void Chassis_DriveToAngle(double targetAngle, double maxSpeedL,double maxSpeedR)
         wait(1, msec); // 稍微延迟以防止CPU过载
     }
     Chassis_Stop(3);
+}
+
+
+/*-----以下为参考林老师新的程序------*\
+\*---------------END---------------*/
+
+
+void RunpidStraightNTo(double speed_limit, int aim, double err_1, double speed_limit2, 
+                       int dec_point, int change_steps, int start_point, 
+                       int outtime, double newgyro, int p_point) {
+
+    double Kp = 0.26, Ki = 0.00, Kd = 0.23;
+    
+    double value_now = 0, EI = 0, ED = 0, err_now = 0, err_last = 0;
+    double max_v = speed_limit, Kt = 0, Ktv = 0, ET = 0, ETV = 0, sum_dec = 0;
+    double value_now_L = 0, value_last_L = 0, value_now_R = 0, value_last_R = 0;
+    double outputL, outputR, angle_err = 0;
+    int sampletime = 10;
+    double acc = 0.2;
+    double K_gyro = 0.7;
+
+    left1.resetPosition();
+    right1.resetPosition();
+    T1.clear(); T2.clear(); T3.clear(); T4.clear(); TACC.clear();
+
+    steps = 0; 
+
+    while (true) {
+        printf("%.2f\n", left1.velocity(pct));
+        double returnangle = Gyro.rotation(degrees);
+
+        max_v = acc * TACC.time();
+        if (TACC.time() > 500) max_v = speed_limit;
+        if (max_v > speed_limit) max_v = speed_limit;
+
+        if (dec_point != -1 && fabs(left1.position(vex::rotationUnits::deg)) > dec_point) {
+            max_v = speed_limit - (fabs(left1.position(vex::rotationUnits::deg)) - dec_point) / 50.0;
+            if (max_v < speed_limit2) max_v = speed_limit2;
+        }
+
+        if (change_steps != -1 && start_point <= fabs(value_now_L)) {
+            steps = change_steps;
+            change_steps = -1;
+        }
+
+        value_now = left1.position(vex::rotationUnits::deg);
+        if (T2.time() > 100) {
+            T2.clear();
+            value_last_R = value_now_R;
+            value_last_L = value_now_L;
+            value_now_R = right1.position(vex::rotationUnits::deg);
+            value_now_L = left1.position(vex::rotationUnits::deg);
+            ETV = (value_now_R - value_last_R) - (value_now_L - value_last_L);
+            ET = value_now_R - value_now_L;
+            sum_dec += Ktv * ETV;
+        }
+
+        if (T3.time() > sampletime) {
+            T3.clear();
+            err_last = err_now;
+            err_now = aim - value_now;
+            ED = err_now - err_last;
+            if (fabs(err_now) > 100) EI = 0;
+            else EI += err_now;
+            outputL = Kp * err_now + Ki * EI + Kd * ED;
+            if (fabs(outputL) > max_v) outputL = sgn(outputL) * max_v;
+
+            angle_err = newgyro - returnangle;
+            if (fabs(angle_err) < 1) angle_err = 0;
+            outputR = outputL - Kt * ET - Ktv * ETV - K_gyro * angle_err;
+
+            Chassis_Run(outputL, outputR);
+            sleep(sampletime);
+            if (fabs(err_now) > err_1) T1.clear();
+            if (T1.time() > 25 || T4.time() >= outtime) {
+                Chassis_Stop();
+                break;
+            }
+        }
+    }
+    Chassis_Stop();
+}
+
+
+void RightVol(int vol_input) {
+  right1.spin(fwd, 0.128*vol_input, voltageUnits::volt);
+  right2.spin(fwd, 0.128*vol_input, voltageUnits::volt);
+  right3.spin(fwd, 0.128*vol_input, voltageUnits::volt);
+}
+
+
+void LeftVol(int vol_input) {
+  left1.spin(fwd, 0.128*vol_input, voltageUnits::volt);
+  left2.spin(fwd, 0.128*vol_input, voltageUnits::volt);
+  left3.spin(fwd, 0.128*vol_input, voltageUnits::volt);
+}
+void TurnVol(int turnpct) {
+    LeftVol(turnpct);
+    RightVol(-turnpct);
+}
+
+//新转向
+void TurnpidNTo(int max_speed, double aim, double howerr, int outtime) {
+    double Kp = 0.75, Ki = 0, Kd = 0.15;
+    
+    double err_now = 0, err_last = 0, value_now = 0, EI = 0, ED = 0, output = 0;
+    int sampletime = 10;
+
+    T1.clear();
+    T4.clear();
+
+    value_now = Gyro.rotation(degrees);
+    err_now = aim - value_now;
+
+    Brain.Screen.drawRectangle(1, 1, 400, 400, vex::color::red);
+
+    while (true) {
+        value_now = Gyro.rotation(degrees);
+        err_now = aim - value_now;
+        EI += err_now;
+        if (fabs(err_now) > 15) EI = 0;
+        ED = err_now - err_last;
+
+        output = Kp * err_now + Ki * EI + Kd * ED;
+        if (fabs(output) > max_speed) output = sgn(output) * max_speed;
+
+        TurnVol(output);
+
+        err_last = err_now;
+
+        sleep(sampletime);
+
+        if (fabs(err_now) > howerr) T1.clear();
+        if (T1.time() > 25 || T4.time() >= outtime) {
+            Chassis_Stop(2);
+            break;
+        }
+    }
+
+    Brain.Screen.drawRectangle(1, 1, 400, 400, vex::color::blue);
 }
