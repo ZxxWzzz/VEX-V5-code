@@ -24,4 +24,14 @@ extern motor Shootermotor;
  */
 void  vexcodeInit( void );
 
+extern vex::timer T1;
+extern vex::timer T2;
+extern vex::timer T3;
+extern vex::timer T4;
+extern vex::timer TACC;
+
+extern int steps;
+
+#define sleep(a) vex::task::sleep(a)
+
 #endif
