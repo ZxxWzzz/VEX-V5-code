@@ -16,8 +16,7 @@
 /*-----------爬升控制-------------*\
 函数功能： 控制底盘运动
 依    赖： 
-输入变量： 
-          
+输入变量：   
 返 回 值： 无
 \*---------------END------------------*/
 void climber(bool Button_a,bool Button_b)
@@ -31,8 +30,6 @@ void climber(bool Button_a,bool Button_b)
 函数功能： 控制底盘转动
 依    赖： 滚筒双电机
 输入变量： a:
-          
-          
 返 回 值： 无
 \*---------------END------------------*/
 void roller(bool Button_a, bool Button_b)
@@ -72,12 +69,27 @@ void roller(bool Button_a, bool Button_b)
   }
 }
 
+/*-----------滚筒控制1-------------*\
+函数功能： 控制底盘转动
+依    赖： 滚筒双电机
+输入变量： a:   
+返 回 值： 无
+\*---------------END------------------*/
+void roller1(bool Button_a, bool Button_b)
+{
+  if (Button_a) {
+    Rollmotor.spin(vex::directionType::fwd, 100, vex::voltageUnits::volt);
+  } 
+  if (Button_b) {
+    Rollmotor.spin(vex::directionType::rev, 100, vex::voltageUnits::volt);
+  }
+}
+
 /*-------------弹射控制---------------*\
 函数功能： 击球结构发射装置
 依    赖： 击球结构的电机
 输入变量： Button 1：持续击打
                  0：停止
-          
 返 回 值： 无
 \*---------------END------------------*/
 void shooter(bool Button)
@@ -106,11 +118,9 @@ void shooterClick(bool Button)
 /*-----------侧挂控制-------------*\
 函数功能： 控制底盘转动
 依    赖： 滚筒双电机
-输入变量： isMotorReversed:
-          
-          
+输入变量： isMotorReversed:  
 返 回 值： 无
-\*---------------END------------------*/
+\*---------------END--------------*/
 
 bool isMotorReversed = false;
 bool starthold = false;
@@ -144,4 +154,19 @@ void gua(bool Button_a) {
         cegua.setBrake(vex::brakeType::hold);  // 锁死电机
     }
 
+}
+
+/*-----------高挂自动回收----------*\
+函数功能： 控制高挂电机回收
+依    赖： 高挂电机
+输入变量： 无
+返 回 值： 无
+备    注：以进入程序时角度为基础，期望
+         角度未经过换算需实际测试
+\*---------------END--------------*/
+
+void climberbake(bool Button_d){
+  if(Button_d){
+      Climbmotor.spinToPosition(0,degrees,100,velocityUnits::pct);
+  }
 }
