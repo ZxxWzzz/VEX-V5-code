@@ -64,39 +64,44 @@ void Auto_function_far(void)
   Chassis_Forward(100,0,true); 
   Chassis_Forward(-680,0,true);
 
-  Chassis_Run(-9.5,-4);
-  wait(950, msec);
+  Chassis_Run(-9.5,-5);
+  wait(850, msec);
   Chassis_Stop();
 
   Chassis_Run(-50,-50);
   wait(450, msec);
   Chassis_Stop();
 
-  Chassis_Forward(150,0,true); 
+  Chassis_Run(5,5);
+  wait(250, msec);
+  Chassis_Stop(3);
+  // Chassis_Forward(150,0,true); 
 
   Chassis_Turn(160,35); 
 
-  Chassis_Run(50,50);
+  Chassis_Run(70,70);
   Rollmotor.stop();
   wait(550, msec);
   Chassis_Stop();
 
   Chassis_Forward(-300,0,true);
-  Chassis_Turn(-50,35); //朝第三球方向，可调整
+  Chassis_Turn(-45,35); //朝第三球方向，可调整
   /*========================*/
 
   /*=====第二阶段（一球）=====*/
   Rollmotor.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
-  Chassis_Forward(980,0,true); //前进收第三球
+  Chassis_Forward(990,0,true); //前进收第三球
+  wait(200, msec);
+
 
   Chassis_Turn(115,35); //冲撞角度  需要调整！！！
-  Chassis_Forward(400,0,true);
+  Chassis_Forward(420,0,true);
   Chassis_Turn(26); //调整角度  需要调整！！！
 
   Rollmotor.stop();
 
   Chassis_Run(70,70);
-  wait(500, msec);
+  wait(550, msec);
   Chassis_Stop();
 
   wait(10, msec); //test
@@ -107,14 +112,21 @@ void Auto_function_far(void)
 
   Rollmotor.spin(vex::directionType::fwd,100,vex::velocityUnits::pct);
 
-  Chassis_DriveToAngle(-140, 5, -0.5); //倒退单电机角度！！！重点调整
+  Chassis_DriveToAngle(-130, 4.5, -0.5); //倒退单电机角度！！！重点调整4
+  Chassis_Stop(3);
+  wait(100, msec);
 
-  Chassis_Forward(550,0,true,45); //第四球前进距离！！！ 重点调整
-  wait(500, msec);
+  Chassis_Forward(560,-45,true,45); //第四球前进距离！！！ 重点调整
+  wait(350, msec);
 
-  Chassis_Turn(95,35);  
+  Chassis_Run(-5,-5);
+  wait(200, msec);
+  Chassis_Stop();
+  // Chassis_Forward(-100,0,true,45); //倒退防撞
 
-  Chassis_Run(50, 50);
+  Chassis_Turn(115,35);  
+
+  Chassis_Run(70, 70);
   wait(700, msec);
   Chassis_Stop();
   Rollmotor.stop();
@@ -125,11 +137,58 @@ void Auto_function_far(void)
 /*===========================================================================*/
 
 void Auto_function_near(void){
+
+  Task_state(false);
+
+
   /*========角球========*/
-  cegua.spin(reverse, 100, pct);
-  wait(650, msec);  // 等待0.65秒
-  cegua.stop();     // 停止电机
+  Rollmotor.spin(vex::directionType::fwd,10,vex::velocityUnits::pct);
+
+  cegua.spin(reverse, 100, pct);  //侧挂电机运行
+  wait(650, msec); 
+  cegua.stop();     
   cegua.setBrake(vex::brakeType::hold);  // 锁死电机
+
+  Chassis_Turn(-90,50);
+  wait(100, msec);
+  Chassis_Forward(850,0,true); //前进
+
   /*===================*/
+
+  /*=======预装球=======*/
+  Chassis_Turn(-110,50);
+  wait(250, msec);
+
+  Chassis_Run(50, 50);
+  wait(700, msec);
+  Chassis_Stop();
+  /*====================*/
+
+  cegua.spin(fwd, 100, pct);  //侧挂电机回收
+  wait(650, msec); 
+  cegua.stop();  
+
+  /*=======后撤=========*/
+  Chassis_Forward(-155,0,true); 
+  wait(100, msec);
+  Chassis_Turn(-85,35);
+
+  Chassis_Forward(900,0,true); 
+  Chassis_Turn(-90,30);
+
+  Climbmotor.spinFor(reverse,690,degrees,100,velocityUnits::pct);
+
+  Chassis_Forward(540,0,true); 
+
+  /*====================*/
+
+}
+
+void Auto_test(){
+//void RunpidStraightNTo(double speed_limit, int aim,double err_1,double speed_limit2, int dec_point, int change_steps,int start_point,int outtime, double newgyro, int p_point);
+  Task_state(false);
+  RunpidStraightNTo(45,     500,    1,       5,           100,   0,           0,    500,  0,0);
+  TurnpidNTo(50, 90, 1, 500);
+  TurnpidNTo(50, -90, 1, 1000);
 
 }
