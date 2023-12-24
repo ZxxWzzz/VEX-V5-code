@@ -480,8 +480,7 @@ void Chassis_DriveToAngle(double targetAngle, double maxSpeedL,double maxSpeedR)
 
 
 void RunpidStraightNTo(double speed_limit, int aim, double err_1, double speed_limit2, 
-                       int dec_point, int change_steps, int start_point, 
-                       int outtime, double newgyro, int p_point) {
+                       int dec_point, int outtime, double newgyro) {
 
     double Kp = 0.26, Ki = 0.00, Kd = 0.23;
     
@@ -508,13 +507,9 @@ void RunpidStraightNTo(double speed_limit, int aim, double err_1, double speed_l
         if (max_v > speed_limit) max_v = speed_limit;
 
         if (dec_point != -1 && fabs(left1.position(vex::rotationUnits::deg)) > dec_point) {
+            Brain.Screen.drawRectangle(1, 1, 400, 400, vex::color::green);//显示绿色进入第二进程
             max_v = speed_limit - (fabs(left1.position(vex::rotationUnits::deg)) - dec_point) / 50.0;
             if (max_v < speed_limit2) max_v = speed_limit2;
-        }
-
-        if (change_steps != -1 && start_point <= fabs(value_now_L)) {
-            steps = change_steps;
-            change_steps = -1;
         }
 
         value_now = left1.position(vex::rotationUnits::deg);

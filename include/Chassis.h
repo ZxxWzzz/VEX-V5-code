@@ -20,7 +20,7 @@ void Chassis_Forward(double Aim_Distance,double Aim_Angle,bool Auto_User=true,do
                                                          //底盘前进'Aim_Distance'单位,默认为基于当前位置旋转
 void Chassis_DriveToAngle(double targetAngle, double maxSpeedL,double maxSpeedR);
                                                           //自动阶段电机运动角度方法
-void RunpidStraightNTo(double speed_limit, int aim,double err_1,double speed_limit2, int dec_point, int change_steps,int start_point,int outtime, double newgyro, int p_point);//新自动程序——直线
+void RunpidStraightNTo(double speed_limit, int aim,double err_1,double speed_limit2, int dec_point,int outtime, double newgyro);//新自动程序——直线
 /*---------------参数声明--------------*\
 double speed_limit:这是机器人移动的最大速度限制。它定义了机器人在直线行驶时可以达到的最高速度。
 
@@ -32,15 +32,9 @@ double speed_limit2:这是第二阶段的速度限制。当机器人接近目标
 
 int dec_point:这是减速点。当机器人行进的距离达到这个点时，它将开始减速，使用speed_limit2作为新的速度限制。
 
-int change_steps:这个参数用于定义在特定点改变行为的步骤编号。它可以用于在特定的行进阶段改变机器人的行为或启动不同的任务。
-
-int start_point:这是开始执行change_steps中定义的行为的起始点。
-
 int outtime:这是操作的超时时间。如果机器人在这段时间内未能达到目标，操作将终止。这可以防止机器人在遇到问题时无休止地尝试达到目标。
 
 double newgyro:这是目标陀螺仪角度。在直线运动中，它通常用于保持机器人的方向稳定，确保它直线行驶。
-
-int p_point:这个参数用于选择不同的PID控制参数配置。在不同的行驶阶段或条件下，可以通过改变PID参数来优化机器人的行为。
 \*----------------END------------------*/
 
 void RightVol(int vol_input);

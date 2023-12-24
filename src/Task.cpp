@@ -131,8 +131,8 @@ int Task_STOP()
   {
     if(Controller1.ButtonDown.pressing()&&Controller1.ButtonLeft.pressing())
     {
-      // while(1)
-      //   Chassis_Stop(3);
+      while(1)
+        Chassis_Stop(3);
     }
     wait(100, msec);
   }

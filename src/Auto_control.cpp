@@ -185,9 +185,9 @@ void Auto_function_near(void){
 }
 
 void Auto_test(){
-//void RunpidStraightNTo(double speed_limit, int aim,double err_1,double speed_limit2, int dec_point, int change_steps,int start_point,int outtime, double newgyro, int p_point);
   Task_state(false);
-  RunpidStraightNTo(45,     500,    1,       5,           100,   0,           0,    500,  0,0);
+
+  RunpidStraightNTo(45,500,1,5,200,500,0);
   TurnpidNTo(50, 90, 1, 500);
   TurnpidNTo(50, -90, 1, 1000);
 
