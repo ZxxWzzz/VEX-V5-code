@@ -61,6 +61,8 @@ int Task1_Chassis_fun()
 \*---------------END------------------*/
 int Task2_UI_fun()
 {
+  left1.resetPosition();
+  right1.resetPosition();
   Brain.Screen.setFont(prop40);
   Brain.Screen.clearScreen();
   while(1)
@@ -70,7 +72,7 @@ int Task2_UI_fun()
     Brain.Screen.printAt(1, 120,"Right = %.1fmm",right1.rotation(deg)/2.637f);
     //Brain.Screen.printAt(1, 160, "Gyro = %.3f",Chassis_Angle());
     //Brain.Screen.printAt(1, 200, "Gyro = %.3f",Chassis_Angle());
-    wait(10, msec); //5ms进行一次遥控采集
+    wait(10, msec); //10ms进行一次遥控采集
   }
 }
 /*===========================================================================*/
@@ -105,6 +107,9 @@ void Task_state(bool task_state)
 {
   if(task_state == false)
   {
+    left1.resetPosition();
+    right1.resetPosition();
+    
     Task1_Chassis.suspend();
     Task2_UI_Brain.suspend();
     Task3_UI_Controller.suspend();

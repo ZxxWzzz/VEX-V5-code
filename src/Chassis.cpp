@@ -373,9 +373,9 @@ void Chassis_Turn(double Aim_Angle, double Speed_MAX,bool Angle_Type, bool Auto_
 返 回 值： 无 
 \*---------------END------------------*/
 void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User,  double Speed_MAX) {
-    double Kp = 0.07;  // 比例系数
-    double Ki = 0.000006;  // 积分系数
-    double Kd = 0.04;  // 微分系数
+    double Kp = 0.2;  // 比例系数
+    double Ki = 0;  // 积分系数
+    double Kd = 0.12;  // 微分系数
     double Tolerance = 4; //允许误差
     double Forward_now = 0;
     double Forward_err_now = 0;
@@ -414,7 +414,7 @@ void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User,  dou
         wait(1, msec);
 
         prev_err = Forward_err_now;      
-        if(prev_err<40){prev_err = 0;} //限制
+        if(prev_err<30){prev_err = 0;} //限制
 
     }
 
@@ -482,7 +482,7 @@ void Chassis_DriveToAngle(double targetAngle, double maxSpeedL,double maxSpeedR)
 void RunpidStraightNTo(double speed_limit, int aim, double err_1, double speed_limit2, 
                        int dec_point, int outtime, double newgyro) {
 
-    double Kp = 0.26, Ki = 0.00, Kd = 0.23;
+    double Kp = 0.22, Ki = 0.00, Kd = 0.23;
     
     double value_now = 0, EI = 0, ED = 0, err_now = 0, err_last = 0;
     double max_v = speed_limit, Kt = 0, Ktv = 0, ET = 0, ETV = 0, sum_dec = 0;
@@ -506,13 +506,19 @@ void RunpidStraightNTo(double speed_limit, int aim, double err_1, double speed_l
         if (TACC.time() > 500) max_v = speed_limit;
         if (max_v > speed_limit) max_v = speed_limit;
 
-        if (dec_point != -1 && fabs(left1.position(vex::rotationUnits::deg)) > dec_point) {
-            Brain.Screen.drawRectangle(1, 1, 400, 400, vex::color::green);//显示绿色进入第二进程
-            max_v = speed_limit - (fabs(left1.position(vex::rotationUnits::deg)) - dec_point) / 50.0;
-            if (max_v < speed_limit2) max_v = speed_limit2;
+        if (dec_point != -1 && fabs(left1.position(vex::rotationUnits::deg)* 2.637f) > dec_point * 2.637f) {
+            max_v = speed_limit - (fabs(left1.position(vex::rotationUnits::deg)* 2.637f) - dec_point * 2.637f) / 50.0;
+            Brain.Screen.drawRectangle(230, 100, 100, 100, vex::color::green);//显示绿色进入第二进程
+
+            Kp *=0.5, Ki *= 0.5, Kd *= 0.5;
+
+            if (max_v < speed_limit2){
+              max_v = speed_limit2;
+            }
         }
 
         value_now = left1.position(vex::rotationUnits::deg);
+
         if (T2.time() > 100) {
             T2.clear();
             value_last_R = value_now_R;
@@ -527,7 +533,7 @@ void RunpidStraightNTo(double speed_limit, int aim, double err_1, double speed_l
         if (T3.time() > sampletime) {
             T3.clear();
             err_last = err_now;
-            err_now = aim - value_now;
+            err_now = aim * 2.637f - value_now * 2.637f;
             ED = err_now - err_last;
             if (fabs(err_now) > 100) EI = 0;
             else EI += err_now;
@@ -535,19 +541,20 @@ void RunpidStraightNTo(double speed_limit, int aim, double err_1, double speed_l
             if (fabs(outputL) > max_v) outputL = sgn(outputL) * max_v;
 
             angle_err = newgyro - returnangle;
-            if (fabs(angle_err) < 1) angle_err = 0;
+            if (fabs(angle_err) < 3) angle_err = 0;
             outputR = outputL - Kt * ET - Ktv * ETV - K_gyro * angle_err;
 
             Chassis_Run(outputL, outputR);
+
             sleep(sampletime);
             if (fabs(err_now) > err_1) T1.clear();
             if (T1.time() > 25 || T4.time() >= outtime) {
-                Chassis_Stop();
+                Chassis_Stop(2);
                 break;
             }
         }
     }
-    Chassis_Stop();
+    Chassis_Stop(2);
 }
 
 
@@ -557,12 +564,12 @@ void RightVol(int vol_input) {
   right3.spin(fwd, 0.128*vol_input, voltageUnits::volt);
 }
 
-
 void LeftVol(int vol_input) {
   left1.spin(fwd, 0.128*vol_input, voltageUnits::volt);
   left2.spin(fwd, 0.128*vol_input, voltageUnits::volt);
   left3.spin(fwd, 0.128*vol_input, voltageUnits::volt);
 }
+
 void TurnVol(int turnpct) {
     LeftVol(turnpct);
     RightVol(-turnpct);
@@ -601,7 +608,7 @@ void TurnpidNTo(int max_speed, double aim, double howerr, int outtime) {
 
         if (fabs(err_now) > howerr) T1.clear();
         if (T1.time() > 25 || T4.time() >= outtime) {
-            Chassis_Stop(2);
+            Chassis_Stop(3);
             break;
         }
     }

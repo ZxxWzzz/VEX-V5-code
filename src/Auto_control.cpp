@@ -185,10 +185,13 @@ void Auto_function_near(void){
 }
 
 void Auto_test(){
+
   Task_state(false);
 
-  RunpidStraightNTo(45,500,1,5,200,500,0);
-  TurnpidNTo(50, 90, 1, 500);
-  TurnpidNTo(50, -90, 1, 1000);
+  RunpidStraightNTo(65,700,1,25,410,2000,-90);
+
+  // sleep(500);
+  // TurnpidNTo(50, 90, 1, 500);
+  // TurnpidNTo(50, -90, 1, 1000);
 
 }

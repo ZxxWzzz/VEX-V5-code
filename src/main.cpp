@@ -32,7 +32,10 @@ void pre_auton(void)   //**
 
 //自动模式(三选一)
 void autonomous(void){
-  
+  //清除主屏幕参数显示
+  left1.resetPosition();
+  right1.resetPosition();
+
   // Auto_function_far();
   // Auto_function_near();
   Auto_test();
@@ -43,7 +46,7 @@ void autonomous(void){
 void usercontrol(void){User_function();}    //手动程序
 
 int main()     //运行程序开始处
-{
+{ 
   // Run the pre-autonomous function.
   pre_auton();
   // Set up callbacks for autonomous and driver control periods.
