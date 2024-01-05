@@ -116,44 +116,37 @@ void shooterClick(bool Button)
 }
 
 /*-----------侧挂控制-------------*\
-函数功能： 控制底盘转动
-依    赖： 滚筒双电机
-输入变量： isMotorReversed:  
+函数功能： 控制电磁阀
+依    赖： 气动电磁阀
+输入变量： is_state
 返 回 值： 无
 \*---------------END--------------*/
 
-bool isMotorReversed = false;
-bool starthold = false;
+int is_state = -1;
 
+void Pump(bool Button_a) {
 
-void gua(bool Button_a) {
-    cegua.setBrake(vex::brakeType::hold);  // 锁死电机
-    
-    //  初始锁死
-    if(!starthold){
-      cegua.spin(forward, 100, pct);
-      wait(350, msec);  // 等待0.35秒
-      cegua.stop();     // 停止电机
-      cegua.setBrake(vex::brakeType::hold);  // 锁死电机
-      starthold = true;
+    if(Button_a){
+      if(is_state == 1){
+        Pumper.set(true);
+      }else {
+        Pumper.set(false);
       }
-
-    if (Button_a) {
-        // 切换电机状态
-        isMotorReversed = !isMotorReversed;
-
-        // 根据状态控制电机
-        if (isMotorReversed) {
-            cegua.spin(reverse, 100, pct);  // 启动电机（反转）
-        } else {
-            cegua.spin(forward, 100, pct); // 启动电机（正向）
-        }
-
-        wait(650, msec);  // 等待0.42秒
-        cegua.stop();     // 停止电机
-        cegua.setBrake(vex::brakeType::hold);  // 锁死电机
+      is_state *= -1;
+      sleep(250);
     }
 
+}
+
+/*-----------自动用侧挂控制-------------*\
+函数功能： 控制电磁阀
+依    赖： 气泵电磁阀
+输入变量： 打开时间
+返 回 值： 无
+\*---------------END-------------------*/
+void Auto_Pump(bool a){
+  if(a) {Pumper.set(true);}
+  else {Pumper.set(false);}
 }
 
 /*-----------高挂自动回收----------*\

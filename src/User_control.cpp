@@ -36,11 +36,11 @@ void  User_function(void)
     // ==========================================遥控程序，按键可设置================================================
     Rollmotor.spin(vex::directionType::fwd,20,vex::velocityUnits::pct);
 
-    climberbake(Controller1.ButtonDown.pressing());
+    climberbake(Controller1.ButtonDown.pressing());                             //高挂自动回收
     shooter(Controller1.ButtonY.pressing());                                    //弹射：按着就启动，松开就停
     climber(Controller1.ButtonL2.pressing(),Controller1.ButtonL1.pressing());   //爬升：一个上，一个下，松开就停
     roller1(Controller1.ButtonR1.pressing(),Controller1.ButtonR2.pressing());    //按下就一直转，有防堵转
-    gua(Controller1.ButtonA.pressing());         //侧挂程序
+    Pump(Controller1.ButtonA.pressing());         //侧挂程序
     // ============================================================================================================
     // Task1_Chassis.resume();
     wait(10,msec);

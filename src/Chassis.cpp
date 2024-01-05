@@ -418,7 +418,7 @@ void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User,  dou
 
     }
 
-    Chassis_Stop(3);  // 刹车模式3 抱死刹车
+    Chassis_Stop(2);  // 刹车模式3 
 }
 /*===========================================================================*/
 
@@ -435,7 +435,7 @@ void Chassis_Forward(double Aim_Distance, double Aim_Angle, bool Auto_User,  dou
 
 void Chassis_DriveToAngle(double targetAngle, double maxSpeedL,double maxSpeedR) {
     const double tolerance = 3.5; // 允许误差范围
-    double Kp = 0.5; // 比例系数
+    double Kp = 0.4; // 比例系数
     double Ki = 0.0; // 积分系数
     double Kd = 0.45; // 微分系数
 
@@ -482,7 +482,9 @@ void Chassis_DriveToAngle(double targetAngle, double maxSpeedL,double maxSpeedR)
 void RunpidStraightNTo(double speed_limit, int aim, double err_1, double speed_limit2, 
                        int dec_point, int outtime, double newgyro) {
 
-    double Kp = 0.22, Ki = 0.00, Kd = 0.23;
+    Gyro.resetRotation();
+
+    double Kp = 0.2, Ki = 0.00, Kd = 0.19;
     
     double value_now = 0, EI = 0, ED = 0, err_now = 0, err_last = 0;
     double max_v = speed_limit, Kt = 0, Ktv = 0, ET = 0, ETV = 0, sum_dec = 0;
@@ -506,7 +508,7 @@ void RunpidStraightNTo(double speed_limit, int aim, double err_1, double speed_l
         if (TACC.time() > 500) max_v = speed_limit;
         if (max_v > speed_limit) max_v = speed_limit;
 
-        if (dec_point != -1 && fabs(left1.position(vex::rotationUnits::deg)* 2.637f) > dec_point * 2.637f) {
+        if (dec_point != -1 && fabs(right1.position(vex::rotationUnits::deg)* 2.637f) > dec_point * 2.637f) {
             max_v = speed_limit - (fabs(left1.position(vex::rotationUnits::deg)* 2.637f) - dec_point * 2.637f) / 50.0;
             Brain.Screen.drawRectangle(230, 100, 100, 100, vex::color::green);//显示绿色进入第二进程
 
@@ -517,7 +519,7 @@ void RunpidStraightNTo(double speed_limit, int aim, double err_1, double speed_l
             }
         }
 
-        value_now = left1.position(vex::rotationUnits::deg);
+        value_now = right1.position(vex::rotationUnits::deg);
 
         if (T2.time() > 100) {
             T2.clear();
@@ -552,9 +554,13 @@ void RunpidStraightNTo(double speed_limit, int aim, double err_1, double speed_l
                 Chassis_Stop(2);
                 break;
             }
+            if(err_1 > fabs(err_now) ){
+              Chassis_Stop(2);
+              break;
+            }
         }
     }
-    Chassis_Stop(2);
+    Chassis_Stop(3);
 }
 
 
@@ -577,6 +583,8 @@ void TurnVol(int turnpct) {
 
 //新转向
 void TurnpidNTo(int max_speed, double aim, double howerr, int outtime) {
+    Gyro.resetRotation();
+
     double Kp = 0.75, Ki = 0, Kd = 0.15;
     
     double err_now = 0, err_last = 0, value_now = 0, EI = 0, ED = 0, output = 0;
@@ -615,3 +623,4 @@ void TurnpidNTo(int max_speed, double aim, double howerr, int outtime) {
 
     Brain.Screen.drawRectangle(1, 1, 400, 400, vex::color::blue);
 }
+

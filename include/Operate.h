@@ -8,7 +8,8 @@ void roller1(bool Button_a,bool Button_b);    //滚筒机构——长按
 
 void shooter(bool Button);                    //发射机构
 void shooterClick(bool Button);            
-void gua(bool Button_a);
+void Pump(bool Button_a);                     //气泵控制
+void Auto_Pump(bool a);                             //自动阶段气泵控制
 void climberbake(bool Button_d);                           //高挂回收
 
 

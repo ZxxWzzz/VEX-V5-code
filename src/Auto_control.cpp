@@ -188,10 +188,92 @@ void Auto_test(){
 
   Task_state(false);
 
-  RunpidStraightNTo(65,700,1,25,410,2000,-90);
+  //{展开推预装球}
+  Auto_Pump(true);
+  sleep(500);
+  Auto_Pump(false);
+  sleep(250);
 
-  // sleep(500);
-  // TurnpidNTo(50, 90, 1, 500);
-  // TurnpidNTo(50, -90, 1, 1000);
+  /*========中间球========*/
+  Rollmotor.spin(vex::directionType::fwd,8,volt);
+
+  RunpidStraightNTo(85,1350,5,25,1200,950,-30);
+
+  sleep(250);
+
+  TurnpidNTo(75, 130, 1, 520);
+
+  sleep(450);
+
+  Rollmotor.spin(vex::directionType::rev,12,volt);
+  sleep(350);
+  Rollmotor.stop();
+  /*=====================*/
+
+  /*========第二球========*/
+  TurnpidNTo(75, -164, 1, 580);
+
+  sleep(200);
+
+  Rollmotor.spin(vex::directionType::fwd,8,volt);
+
+  RunpidStraightNTo(85,740,5,35,650,700,0);
+
+  sleep(350);
+
+  RunpidStraightNTo(40,-250,5,35,200,380,0);  //第三球拿到后倒退防磕碰
+
+  sleep(250);
+
+  TurnpidNTo(75, 180, 1, 620);
+
+  sleep(200);
+
+  Auto_Pump(true);
+  Rollmotor.stop();
+
+  Chassis_Run(40, 40);
+  sleep(450);
+  Chassis_Stop();
+
+  Auto_Pump(false);
+  sleep(300);
+  /*=====================*/
+
+  /*========第三球========*/
+  RunpidStraightNTo(25,-350,5,5,200,350,0);
+
+  sleep(200);
+
+  TurnpidNTo(80, 145, 1, 600);
+
+  sleep(200);
+
+  Rollmotor.spin(vex::directionType::fwd,8,volt);
+  RunpidStraightNTo(85,1400,5,45,1200,850,0);
+  sleep(300);
+
+  RunpidStraightNTo(40,-250,5,35,200,380,0);  //第三球拿到后倒退防磕碰
+
+  TurnpidNTo(70, 67, 1, 500);
+
+  sleep(200);
+
+  RunpidStraightNTo(85,-1500,5,55,1300,880,70);
+
+  sleep(200);
+
+  Rollmotor.stop();
+  Chassis_Run(40, 40);
+  sleep(700);
+  Chassis_Stop();
+
+  Chassis_Run(-20, -20);
+  sleep(250);
+  Chassis_Stop(2);
+
+
+  sleep(500);
+  TurnpidNTo(75, -90, 1, 500);
 
 }

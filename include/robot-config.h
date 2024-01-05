@@ -17,6 +17,7 @@ extern motor Rollmotor;
 extern motor cegua;
 extern motor Climbmotor;
 extern motor Shootermotor;
+extern digital_out Pumper;
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
  * 

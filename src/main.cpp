@@ -24,7 +24,7 @@
 competition Competition;
 
 //多线程显示区域
-void pre_auton(void)   //**
+void pre_auton(void)
 {
   vexcodeInit();
   /*--------------------------------*/    
